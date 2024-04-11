@@ -3,8 +3,10 @@ import openai
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import AzureSearch
+from langchain_openai import AzureOpenAIEmbeddings
+from langchain_community.vectorstores.azuresearch import AzureSearch
+from dotenv import load_dotenv
+load_dotenv('.env')
 
 
 app = FastAPI()
@@ -14,13 +16,19 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 openai.api_type = "azure"
 openai.api_version = "2023-05-15" 
 
-embeddings = OpenAIEmbeddings(deployment="demo-embedding", chunk_size=1)
+embeddings: AzureOpenAIEmbeddings = AzureOpenAIEmbeddings(
+    azure_deployment=os.getenv('AZURE_EMBED_DEPL'),
+    api_key=os.getenv('AZURE_OPENAI_API_KEY'),
+    azure_endpoint=os.getenv('GENEROS_OPENAI_ENDPOINT')
+    )
 
-# Connect to Azure Cognitive Search
-acs = AzureSearch(azure_search_endpoint=os.getenv('SEARCH_SERVICE_NAME'),
-                 azure_search_key=os.getenv('SEARCH_API_KEY'),
-                 index_name=os.getenv('SEARCH_INDEX_NAME'),
-                 embedding_function=embeddings.embed_query)
+# Connect to Azure Cognitive services
+acs: AzureSearch = AzureSearch(
+    azure_search_endpoint=os.getenv('SEARCH_SERVICE_NAME'),
+    azure_search_key=os.getenv('SEARCH_API_KEY'),
+    index_name=os.getenv('SEARCH_INDEX_NAME'),
+    embedding_function=embeddings.embed_query
+)
 
 class Body(BaseModel):
     query: str
