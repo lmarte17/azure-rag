@@ -3,6 +3,7 @@ name: Trigger auto deployment for demo-container
 env:
   AZURE_CONTAINER_APP_NAME: demo-gen-cont
   AZURE_GROUP_NAME: duke-llm-course
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
 # When this action will be executed
 on:
